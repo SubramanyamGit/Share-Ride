@@ -88,7 +88,7 @@ const ridesModel = {
       callback(error);
     }
   },
-  UpdateRide: (data, callback) => {
+  updateRide: (data, callback) => {
     try {
       const { ride_id } = data.body;
       const keysCanUpdate = [
@@ -110,7 +110,6 @@ const ridesModel = {
       const query = `update rides set ${keysForUpdate
         .map((key) => `${key}=?`)
         .join(", ")} where ride_id =?`;
-      console.log(query);
       db.query(query, [...Object.values(data.body), ride_id], (err, data) => {
         if (err) {
           callback(err);
@@ -123,6 +122,22 @@ const ridesModel = {
       callback(error);
     }
   },
+  deleteRide: (data, callback) => {
+    const {ride_id} = data.params
+    const query = "delete from rides where ride_id=?;"
+    try {
+      db.query(query,[ride_id], (err, data) => {
+        if (err) {
+          callback(err);
+        }
+        if (data) {
+          callback(null, data);
+        }
+      });
+    } catch (error) {
+      callback(error);
+    }
+  }
 };
 
 module.exports = ridesModel;

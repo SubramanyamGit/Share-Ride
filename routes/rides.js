@@ -55,7 +55,7 @@ router.get("/my_rides",authenticateMiddleware, (req,res)=>{
 })
 
 router.patch("/",authenticateMiddleware, (req,res)=>{
-  ridesController.UpdateRide(req,(err,response)=>{
+  ridesController.updateRide(req,(err,response)=>{
     if(err){
       res.status(401).json({
         status: "Failure",
@@ -65,6 +65,23 @@ router.patch("/",authenticateMiddleware, (req,res)=>{
     if (response) {
       res.status(200).json({
         status: "Updated Ride Successfully",
+        data: response,
+      });
+    }
+  })
+})
+
+router.delete("/:ride_id",authenticateMiddleware, (req,res)=>{
+  ridesController.deleteRide(req,(err,response)=>{
+    if(err){
+      res.status(401).json({
+        status: "Failure",
+        message: err.message,
+      })
+    }
+    if (response) {
+      res.status(200).json({
+        status: "Deleted Ride Successfully",
         data: response,
       });
     }

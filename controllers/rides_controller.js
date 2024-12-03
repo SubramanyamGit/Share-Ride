@@ -43,9 +43,23 @@ const ridesController = {
       callback(error);
     }
   },
-  UpdateRide: (req, callback) => {
+  updateRide: (req, callback) => {
     try {
-      ridesModel.UpdateRide(req, (err, data) => {
+      ridesModel.updateRide(req, (err, data) => {
+        if (err) {
+          callback(err);
+        }
+        if (data) {
+          return callback(null, data);
+        }
+      });
+    } catch (error) {
+      callback(error);
+    }
+  },
+  deleteRide: (req, callback) => {
+    try {
+      ridesModel.deleteRide(req, (err, data) => {
         if (err) {
           callback(err);
         }

@@ -39,3 +39,17 @@ CREATE TABLE rides (
     mobile_no VARCHAR(15) NOT NULL;
     FOREIGN KEY (created_by) REFERENCES users(user_id)
 );
+
+-- Create bookings table
+CREATE TABLE bookings(
+    booking_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    ride_id INTEGER NOT NULL,
+    booked_by INTEGER NOT NULL,
+    booked_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    full_name VARCHAR(100) NOT NULL,
+    mobile_no VARCHAR(15) NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
+    payment_status VARCHAR(50) NOT NULL,
+    booking_message VARCHAR(255),
+    no_of_seats INTEGER NOT NULL
+);
