@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const db = require("./server");
-
+const sendMail = require('../services/email_service')
 const ridesModel = {
   postRide: (data, callback) => {
     const jwtSecretKey = process.env.JWT_SECRET_KEY;
@@ -44,6 +44,12 @@ const ridesModel = {
             callback(err);
           }
           if (data) {
+            sendMail({
+              from: "subbu6144@gmail.com",
+              to: verified.email,
+              subject: "Ride Posted Successfully",
+              text: `Your Ride Posted Successfully from ${from_place} to ${to_place}`,
+            });
             callback(null, data);
           }
         }
@@ -90,6 +96,9 @@ const ridesModel = {
   },
   updateRide: (data, callback) => {
     try {
+      const jwtSecretKey = process.env.JWT_SECRET_KEY;
+      const token = data.header("authorization").split(" ");
+      const verified = jwt.verify(token[1], jwtSecretKey);
       const { ride_id } = data.body;
       const keysCanUpdate = [
         "pick_up_location",
@@ -98,6 +107,7 @@ const ridesModel = {
         "ride_id",
       ];
       const keysForUpdate = Object.keys(data.body);
+      console.log(keysForUpdate)
       let invalidFileds = false;
       keysForUpdate.forEach((key) => {
         if (!keysCanUpdate.includes(key) && !invalidFileds) {
@@ -115,6 +125,12 @@ const ridesModel = {
           callback(err);
         }
         if (data) {
+          sendMail({
+            from: "subbu6144@gmail.com",
+            to: verified.email,
+            subject: "Ride Updated Successfully",
+            text: `Your Ride Updated Successfully`,
+          });
           callback(null, data);
         }
       });
@@ -123,21 +139,71 @@ const ridesModel = {
     }
   },
   deleteRide: (data, callback) => {
-    const {ride_id} = data.params
-    const query = "delete from rides where ride_id=?;"
+    const jwtSecretKey = process.env.JWT_SECRET_KEY;
+    const token = data.header("authorization").split(" ");
+    const verified = jwt.verify(token[1], jwtSecretKey); // Decoded token contains user details, including role
+    const { ride_id } = data.params;
+  
+    // Query to get the email of the user who created the ride
+    const getUserEmailQuery = `
+      SELECT users.email, rides.created_by 
+      FROM rides 
+      JOIN users ON rides.created_by = users.user_id 
+      WHERE rides.ride_id = ?;
+    `;
+  
+    const deleteRideQuery = "DELETE FROM rides WHERE ride_id = ?;";
+  
     try {
-      db.query(query,[ride_id], (err, data) => {
+      // Step 1: Get the user's email and created_by
+      db.query(getUserEmailQuery, [ride_id], (err, result) => {
         if (err) {
-          callback(err);
+          return callback(err);
         }
-        if (data) {
-          callback(null, data);
+  
+        if (result && result.length > 0) {
+          const { email: userEmail, created_by } = result[0];
+  
+          // Step 2: Delete the ride
+          db.query(deleteRideQuery, [ride_id], (deleteErr, deleteData) => {
+            if (deleteErr) {
+              return callback(deleteErr);
+            }
+  
+            if (deleteData) {
+              let emailSubject = "";
+              let emailText = "";
+  
+              // Step 3: Determine the sender (admin or the user themselves)
+              if (verified.user_id === created_by) {
+                // If the user is deleting their own ride
+                emailSubject = "Your Ride Deleted Successfully";
+                emailText = `You have successfully deleted your ride.`;
+              } else {
+                // If an admin is deleting the ride
+                emailSubject = "Ride Deleted by Admin";
+                emailText = `Your ride has been deleted by an admin.`;
+              }
+  
+              // Step 4: Send email notification
+              sendMail({
+                from: "subbu6144@gmail.com",
+                to: userEmail,
+                subject: emailSubject,
+                text: emailText,
+              });
+  
+              callback(null, deleteData);
+            }
+          });
+        } else {
+          callback(new Error("No user found for the given ride ID."));
         }
       });
     } catch (error) {
       callback(error);
     }
   }
-};
+}  
 
 module.exports = ridesModel;

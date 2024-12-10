@@ -1,11 +1,11 @@
-const userModel = require("../models/users.model");
+const bookingsModel = require("../models/bookings_model");
 
- const usersController  = {
-  getAll: (req, callback) => {
+const bookingsController = {
+  bookRide: (req, callback) => {
     try {
-      userModel.getAll(req, (err, data) => {
+      bookingsModel.bookRide(req, (err, data) => {
         if (err) {
-          return callback(err);
+          callback(err);
         }
         if (data) {
           return callback(null, data);
@@ -15,11 +15,11 @@ const userModel = require("../models/users.model");
       callback(error);
     }
   },
-  getMyDetails: (req, callback) => {
+  getAllBookings: (req, callback) => {
     try {
-      userModel.getMyDetails(req, (err, data) => {
+      bookingsModel.getAllBookings(req, (err, data) => {
         if (err) {
-          return callback(err);
+          callback(err);
         }
         if (data) {
           return callback(null, data);
@@ -29,11 +29,11 @@ const userModel = require("../models/users.model");
       callback(error);
     }
   },
-  createUser: (req, callback) => {
+  getMyBookings: (req, callback) => {
     try {
-      userModel.createUser(req, (err, data) => {
+      bookingsModel.getMyBookings(req, (err, data) => {
         if (err) {
-          return callback(err);
+          callback(err);
         }
         if (data) {
           return callback(null, data);
@@ -42,9 +42,10 @@ const userModel = require("../models/users.model");
     } catch (error) {
       callback(error);
     }
-  },  updateUser: (req, callback) => {
+  },
+  deleteBooking: (req, callback) => {
     try {
-      userModel.updateUser(req, (err, data) => {
+      bookingsModel.deleteBooking(req, (err, data) => {
         if (err) {
           callback(err);
         }
@@ -58,4 +59,4 @@ const userModel = require("../models/users.model");
   },
 };
 
-module.exports = usersController
+module.exports = bookingsController;

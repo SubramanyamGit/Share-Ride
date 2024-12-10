@@ -1,3 +1,4 @@
+const sendMail = require("../services/email_service");
 const sql = require("./server");
 const bcrypt = require("bcrypt");
 
@@ -13,6 +14,12 @@ module.exports = {
           callback(err);
         }
         if (data) {
+          sendMail({
+            from: "subbu6144@gmail.com",
+            to: email,
+            subject: "Welcome to Share Ride",
+            text: "Your account has been sucessfully created",
+          });
           callback(null, { message: "Sign Up Successful" });
         }
       });
